@@ -26,18 +26,6 @@
       FORMSPREE_ENDPOINT.indexOf('YOUR_FORM_ID') === -1;
   }
 
-  /* ---------- Spamschutz: Honeypot-Prüfung (clientseitig) ----------
-     Echte Besucher sehen diese Felder nie und füllen sie nie aus.
-     Bots füllen sie häufig → wir verwerfen die Anfrage lautlos. */
-  function isSpam(form) {
-    var names = ['_gotcha'];
-    for (var i = 0; i < names.length; i++) {
-      var el = form.querySelector('input[name="' + names[i] + '"]');
-      if (el && el.value.trim() !== '') return true;
-    }
-    return false;
-  }
-
   /* Sendet ein Formular an Formspree.
      box = Statusfeld, successHtml = optionaler Bestätigungstext,
      onSuccess = optionaler Callback (z. B. Popup) statt Statusfeld. */
@@ -64,8 +52,6 @@
       box.classList.add('error');
       box.classList.add('show');
     }
-    // Spam lautlos verwerfen (kein Versand, kein Hinweis für Bots)
-    if (isSpam(form)) { resetForm(); return; }
     if (!isFormspreeConfigured()) { showSuccess(); resetForm(); return; }
     var btn = form.querySelector('[type="submit"]');
     var label = btn ? btn.innerHTML : '';
@@ -414,7 +400,6 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!form.checkValidity()) { form.reportValidity(); return; }
-      if (isSpam(form)) { return; }
       var data = new FormData(form);
       var name = String(data.get('name') || '');
       var guests = String(data.get('guests') || '');
@@ -441,7 +426,6 @@
       form.addEventListener('submit', function (e) {
         e.preventDefault();
         if (!form.checkValidity()) { form.reportValidity(); return; }
-        if (isSpam(form)) { return; }
         var box = document.getElementById(form.getAttribute('data-confirm'));
         var data = new FormData(form);
         var isNews = form.classList.contains('newsletter');
